@@ -1,5 +1,6 @@
 import requests
 import os
+import sys
 
 def get_last_n_pull_requests(owner, repo, n=50, token=None):
     """
@@ -7,7 +8,7 @@ def get_last_n_pull_requests(owner, repo, n=50, token=None):
     """
     headers = {}
     if token:
-        headers['Authorization'] = f'token {token}'
+        headers['Authorization'] = f'Bearer {token}'
     
     url = f'https://api.github.com/repos/{owner}/{repo}/pulls'
     params = {
@@ -48,9 +49,23 @@ def write_prs_to_file(prs, filename="pull_requests.txt"):
     print(f"Successfully written {len(prs)} pull requests to {filename}")
 
 if __name__ == "__main__":
-    # Replace with your repository details
-    repo_owner = "your-repo-owner"  # e.g., "octocat"
-    repo_name = "your-repo-name"    # e.g., "Spoon-Knife"
+    # Check for command-line arguments
+    if len(sys.argv) >= 3:
+        # Usage: python prs_to_text.py <owner> <repo> [count]
+        repo_owner = sys.argv[1]
+        repo_name = sys.argv[2]
+        pr_count = int(sys.argv[3]) if len(sys.argv) > 3 else 50
+    else:
+        # Default values - replace with your repository details
+        repo_owner = os.getenv("REPO_OWNER", "your-repo-owner")  # e.g., "octocat"
+        repo_name = os.getenv("REPO_NAME", "your-repo-name")    # e.g., "Spoon-Knife"
+        pr_count = 50
+        
+        if repo_owner == "your-repo-owner" or repo_name == "your-repo-name":
+            print("Usage: python prs_to_text.py <owner> <repo> [count]")
+            print("Or set REPO_OWNER and REPO_NAME environment variables")
+            print("\nExample: python prs_to_text.py facebook react 30")
+            sys.exit(1)
     
     # Obtain a Personal Access Token from GitHub (Settings -> Developer settings -> Personal access tokens)
     # Ensure it has 'repo' scope for private repositories.
@@ -62,7 +77,7 @@ if __name__ == "__main__":
         # Alternatively, you can hardcode it for testing, but NOT recommended for production:
         # github_token = "YOUR_PERSONAL_ACCESS_TOKEN" 
 
-    pull_requests = get_last_n_pull_requests(repo_owner, repo_name, n=50, token=github_token)
+    pull_requests = get_last_n_pull_requests(repo_owner, repo_name, n=pr_count, token=github_token)
 
     if pull_requests:
         write_prs_to_file(pull_requests, f"{repo_owner}_{repo_name}_prs.txt")

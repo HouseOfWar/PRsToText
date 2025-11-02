@@ -36,23 +36,35 @@ pip install -r requirements.txt
 
 ### Basic Usage
 
-1. Edit the `prs_to_text.py` file and update the repository details:
-```python
-repo_owner = "your-repo-owner"  # e.g., "octocat"
-repo_name = "your-repo-name"    # e.g., "Spoon-Knife"
-```
-
-2. (Optional) Set up a GitHub Personal Access Token for private repos or higher rate limits:
+1. (Optional) Set up a GitHub Personal Access Token for private repos or higher rate limits:
 ```bash
 export GITHUB_TOKEN="your_github_token_here"
 ```
 
-3. Run the script:
+2. Run the script with command-line arguments:
 ```bash
-python prs_to_text.py
+python prs_to_text.py <owner> <repo> [count]
 ```
 
-4. Find your output in `{owner}_{repo}_prs.txt`
+Examples:
+```bash
+# Fetch last 50 PRs from facebook/react
+python prs_to_text.py facebook react
+
+# Fetch last 100 PRs from microsoft/vscode
+python prs_to_text.py microsoft vscode 100
+```
+
+3. Find your output in `{owner}_{repo}_prs.txt`
+
+#### Alternative: Environment Variables
+
+You can also use environment variables:
+```bash
+export REPO_OWNER="facebook"
+export REPO_NAME="react"
+python prs_to_text.py
+```
 
 ### Advanced Usage
 
