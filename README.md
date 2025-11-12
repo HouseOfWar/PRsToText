@@ -32,6 +32,12 @@ cd PRsToText
 pip install -r requirements.txt
 ```
 
+3. (Optional) Set up your GitHub token:
+```bash
+cp .env.example .env
+# Edit .env and add your GitHub token
+```
+
 ## 🔧 Usage
 
 ### Basic Usage
@@ -43,7 +49,7 @@ export GITHUB_TOKEN="your_github_token_here"
 
 2. Run the script with command-line arguments:
 ```bash
-python prs_to_text.py <owner> <repo> [count]
+python prs_to_text.py <owner> <repo> [count] [--verbose]
 ```
 
 Examples:
@@ -53,9 +59,23 @@ python prs_to_text.py facebook react
 
 # Fetch last 100 PRs from microsoft/vscode
 python prs_to_text.py microsoft vscode 100
+
+# Fetch last 250 PRs with complete diffs (verbose mode)
+python prs_to_text.py owner repo 250 --verbose
+
+# Verbose mode with short flag
+python prs_to_text.py owner repo 500 -v
 ```
 
 3. Find your output in `{owner}_{repo}_prs.txt`
+
+### Verbose Mode
+
+Use the `--verbose` or `-v` flag to include **complete diffs** for each pull request in the output file. This provides:
+- All summary information (title, author, dates, etc.)
+- **Complete diff of all changes** made in each PR
+
+**Note:** Verbose mode makes additional API requests (one per PR), so it takes longer and uses more of your API rate limit.
 
 #### Alternative: Environment Variables
 
@@ -75,8 +95,12 @@ from prs_to_text import get_last_n_pull_requests, write_prs_to_file
 import os
 
 token = os.getenv("GITHUB_TOKEN")
-prs = get_last_n_pull_requests("owner", "repo", n=100, token=token)
-write_prs_to_file(prs, "my_custom_output.txt")
+
+# Fetch any number of PRs (automatically handles pagination)
+prs = get_last_n_pull_requests("owner", "repo", n=500, token=token)
+
+# Write with verbose mode (includes complete diffs)
+write_prs_to_file(prs, "owner", "repo", "my_custom_output.txt", verbose=True, token=token)
 ```
 
 ## 🔑 GitHub Token Setup
@@ -85,10 +109,21 @@ To access private repositories or avoid rate limits:
 
 1. Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
 2. Generate a new token with `repo` scope
-3. Set it as an environment variable:
-   ```bash
-   export GITHUB_TOKEN="your_token_here"
-   ```
+3. Set it using one of these methods:
+
+### Option 1: `.env` file (Recommended)
+Create a `.env` file in the project directory:
+```bash
+GITHUB_TOKEN=your_token_here
+```
+
+The script will automatically load it!
+
+### Option 2: Environment Variable
+Set it as an environment variable:
+```bash
+export GITHUB_TOKEN="your_token_here"
+```
 
 For persistence, add it to your `~/.bashrc` or `~/.zshrc`:
 ```bash
@@ -122,6 +157,7 @@ Closed At: 2024-01-16T14:22:00Z
 
 - Python 3.6+
 - `requests` library
+- `python-dotenv` library
 
 ## 🌐 Documentation
 
@@ -139,4 +175,7 @@ This is a simple, niche tool, but contributions are welcome! Feel free to open i
 
 - Without authentication, you're limited to 60 requests per hour by GitHub's API
 - With authentication, the limit increases to 5,000 requests per hour
-- The tool fetches up to 100 PRs per request (GitHub API limitation) 
+- The tool automatically handles pagination to fetch any number of PRs (no limit!)
+- Each page fetches up to 100 PRs (GitHub API limitation), but the tool will make multiple requests as needed
+- Verbose mode makes one additional API request per PR to fetch the complete diff
+- The tool includes small delays between requests to be respectful to the GitHub API 
