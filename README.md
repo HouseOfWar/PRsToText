@@ -23,7 +23,7 @@ PRsToText is a niche utility designed to help stateful AI agents track project p
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/lmichaelwar/PRsToText.git
+git clone https://github.com/HouseOfWar/PRsToText.git
 cd PRsToText
 ```
 
